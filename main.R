@@ -125,6 +125,7 @@ write.csv(data, "saved_data/data.csv")
 
 # ---------------------------------------------------------
 # distance-based Moran's eigenvector maps (dbMEM)
+
 png("figs/SI_mem.png", width=2000, height=1600, res=300)
 sink("results/mem.txt")
 mem <- quickMEM(data$y, data[,c("xcoord", "ycoord")])
@@ -168,7 +169,6 @@ print("Fitting random forest...")
 rf_model <- rfsrc(Surv(y, event) ~ ., data=data, importance=TRUE,
                   nodesize=o$optimal[1], mtry=o$optimal[2], save.memory = TRUE,
                   sampsize=nrow(data) * 0.8)
-# rf_model <- rfsrc(Surv(y, event) ~ ., data=data, importance=TRUE, save.memory = TRUE)  
 
 sink("results/rsf.txt")
 print(rf_model)
@@ -323,7 +323,6 @@ sv_importance(shv, max_display=10, kind="beeswarm")
 dev.off()
 
 top_vars <- names(sort(apply(abs(explainer), 2, mean), decreasing=T))
-#top_vars <- top_vars[top_vars != "xcoord" & top_vars != "ycoord"]
 top_vars <- top_vars[top_vars != "Longitude" & top_vars != "Latitude"]
 
 shap_scores_df <- as.data.frame(explainer)

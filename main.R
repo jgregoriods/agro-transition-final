@@ -29,7 +29,7 @@ library(ade4)
 sf_use_s2(FALSE)
 
 # ---------------------------------------------------------
-# DATA PREPARATION
+# Data preparation
 
 # Define datum
 WGS84 <- '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
@@ -106,8 +106,6 @@ data <- na.omit(data)
 xcoord <- data$xcoord
 ycoord <- data$ycoord
 
-# data$xcoord <- data$ycoord <- NULL
-
 # Predictors and target
 X <- data[,1:(ncol(data)-3)]
 y <- data$y
@@ -149,7 +147,7 @@ dev.off()
 data$event <- 1
 
 # ---------------------------------------------------------
-# RANDOM FOREST
+# Random Forest
 
 median_survival <- function(row) {
     idx <- which(row < 0.5)
@@ -160,7 +158,6 @@ median_survival <- function(row) {
     }
 }
 
-# For reproducibility
 set.seed(100)
 print("Tuning random forest...")
 o <- tune(Surv(y, event) ~ ., data=data, sampsize=nrow(data) * 0.8)
@@ -186,6 +183,7 @@ data_points["pred"] <- max(raw_data$AgeCalBP) - predicted
 data_points["res"] <- residuals
 data_points <- data_points[order(abs(data_points$res)), ]
 
+# Individual predictions
 pred_plot <- ggplot() +
     geom_sf(data=coast, fill="white") +
     geom_sf(data=data_points, aes(col=pred)) +
@@ -258,7 +256,7 @@ writeRaster(rf_stack, "saved_data/rf_stack.tif", overwrite=TRUE)
 writeRaster(predicted_time_r, "saved_data/predicted_time_r.tif", overwrite=TRUE)
 # predicted_time_r <- rast("saved_data/predicted_time_r.tif")
 
-# Random forest
+# Random forest plots
 rf_plot <- ggplot() +
     geom_sf(data=coast, fill="white") +
     geom_spatraster(data=rf_stack) +
@@ -271,6 +269,7 @@ png("figs/RForest.png", width=2000, height=1000, res=300)
 plot(rf_plot)
 dev.off()
 
+# Predicted time
 rf_pred <- ggplot() +
     geom_sf(data=coast, fill="white") +
     geom_spatraster(data=predicted_time_r) +
@@ -331,6 +330,7 @@ shap_scores_df$xcoord <- data$xcoord
 shap_scores_df$ycoord <- data$ycoord
 shap_points <- st_as_sf(shap_scores_df, coords=c("xcoord", "ycoord"), crs=WGS84)
 
+# Spatial distribution of SHAP values
 shap_maps <- lapply(1:4, function(i) {
     shap_points_ordered <- shap_points %>% arrange(get(top_vars[i]))
     ggplot() +

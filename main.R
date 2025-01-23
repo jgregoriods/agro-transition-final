@@ -1,3 +1,16 @@
+required_packages <- c(
+    "ape", "caret", "dplyr", "fastshap", "fields", "ggplot2", "gridExtra", 
+    "latticeExtra", "progress", "randomForestSRC", "rasterVis", "RColorBrewer",
+    "rnaturalearth", "rnaturalearthdata", "sf", "sp", "shapviz", "terra", 
+    "tidyterra", "vegan", "ggpubr", "ade4"
+)
+
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) {
+    print("Installing dependencies...")
+    install.packages(missing_packages)
+}
+
 library(ape)
 library(caret)
 library(dplyr)
@@ -18,15 +31,16 @@ library(shapviz)
 library(terra)
 library(tidyterra)
 library(vegan)
+library(ggpubr)
+library(ade4)  # Dependency for quickMEM
+
+sf_use_s2(FALSE)
 
 # please download the quickMEM source code from
 # https://github.com/ajsmit/Quantitative_Ecology/blob/main/Num_Ecol_R_book_ed1/quickMEM.R
 source("quickMEM.R")
 
-# dependencies for quickMEM
-library(ade4)
-
-sf_use_s2(FALSE)
+source("var_names.R")
 
 # ---------------------------------------------------------
 # Data preparation
@@ -51,11 +65,12 @@ all_data_points <- all_data_points[order(all_data_points$AgeCalBP), ]
 # Ages
 age_plot <- ggplot() +
     geom_sf(data=coast, fill="white") +
-    geom_sf(data=all_data_points, aes(col=AgeCalBP)) +
+    geom_sf(data=all_data_points, aes(col=AgeCalBP), size=0.5, alpha=0.5) +
     scale_color_viridis_c(option="turbo", name="Age (cal BP)") +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
-png("figs/C14Ages.png", width=2000, height=1000, res=300)
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
+jpeg("figs/C14Ages.jpg", width=2000, height=1000, res=300)
 plot(age_plot)
 dev.off()
 
@@ -64,11 +79,12 @@ all_data_points$Database[all_data_points$Database == ""] <- "Other source"
 n <- length(unique(all_data_points$Database))
 source_plot <- ggplot() +
     geom_sf(data=coast, fill="white") +
-    geom_sf(data=all_data_points, aes(col=Database)) +
+    geom_sf(data=all_data_points, aes(col=Database), size=0.5, alpha=0.5) +
     scale_color_manual(values = colorRampPalette(brewer.pal(8, "Set3"))(n)) +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
-png("figs/C14Sources.png", width=2000, height=1000, res=300)
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
+jpeg("figs/C14Sources.jpg", width=2000, height=1000, res=300)
 plot(source_plot)
 dev.off()
 
@@ -118,13 +134,13 @@ layers <- subset(layers, cor_vars, negate=T)
 
 data <- data[,!colnames(data) %in% cor_vars]
 
-write.csv(data, "saved_data/data.csv")
+write.csv(data, "saved_data/data.csv", row.names=FALSE)
 # data <- read.csv("saved_data/data.csv")
 
 # ---------------------------------------------------------
 # distance-based Moran's eigenvector maps (dbMEM)
 
-png("figs/SI_mem.png", width=2000, height=1600, res=300)
+jpeg("figs/SI_mem.jpg", width=2000, height=1600, res=300)
 sink("results/mem.txt")
 mem <- quickMEM(data$y, data[,c("xcoord", "ycoord")])
 sink()
@@ -139,8 +155,8 @@ spatial <- data[,c("xcoord", "ycoord")]
 
 v <- varpart(y, terrain, bioclim, soil, spatial)
 
-png("figs/SI_varpart.png", width=2000, height=1600, res=300)
-plot(v, Xnames=c("Terrain", "Bioclim", "Soil", "Spatial"))
+jpeg("figs/SI_varpart.jpg", width=2000, height=1600, res=300)
+plot(v, Xnames=c("Terrain", "Bioclim", "Soil", "Spatial"), bg=1:4)
 dev.off()
 
 # For random forest
@@ -171,7 +187,8 @@ sink("results/rsf.txt")
 print(rf_model)
 sink()
 
-png("figs/SI_RF.png", width=3000, height=2000, res=300)
+names(rf_model$importance) <- var_names[names(rf_model$importance)]
+jpeg("figs/SI_RF.jpg", width=3000, height=2000, res=300)
 plot(rf_model)
 dev.off()
 
@@ -186,11 +203,12 @@ data_points <- data_points[order(abs(data_points$res)), ]
 # Individual predictions
 pred_plot <- ggplot() +
     geom_sf(data=coast, fill="white") +
-    geom_sf(data=data_points, aes(col=pred)) +
+    geom_sf(data=data_points, aes(col=pred), size=0.5, alpha=0.5) +
     scale_color_viridis_c(option="turbo", name="Predicted yr BP") +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
-png("figs/SI_pred.png", width=2000, height=1000, res=300)
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
+jpeg("figs/SI_pred.jpg", width=2000, height=1000, res=300)
 plot(pred_plot)
 dev.off()
 
@@ -200,7 +218,8 @@ res_plot <- ggplot() +
     geom_sf(data=data_points, aes(col=res)) +
     scale_color_viridis_c(name="Residual", option="plasma") +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
 png("figs/SI_res.png", width=2000, height=1000, res=300)
 plot(res_plot)
 dev.off()
@@ -264,8 +283,9 @@ rf_plot <- ggplot() +
     geom_sf(data=coast, fill="transparent") +
     scale_fill_viridis_c(option="turbo", na.value="transparent", name="Probability") +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
-png("figs/RForest.png", width=2000, height=1000, res=300)
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
+jpeg("figs/RForest.jpg", width=2000, height=1000, res=300)
 plot(rf_plot)
 dev.off()
 
@@ -276,8 +296,9 @@ rf_pred <- ggplot() +
     geom_sf(data=coast, fill="transparent") +
     scale_fill_viridis_c(option="turbo", na.value="transparent", name="Predicted yr BP") +
     scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0))
-png("figs/RForestPred.png", width=2000, height=1000, res=300)
+    scale_y_continuous(expand = c(0,0)) +
+    coord_sf(ylim = c(-60, 90))
+jpeg("figs/RForestPred.jpg", width=2000, height=1000, res=300)
 plot(rf_pred)
 dev.off()
 
@@ -290,26 +311,11 @@ pfun <- function(object, newdata) {
 
 xvars <- select(data, -c(y, event))
 
-print("Calculating SHAP values")
+print("Calculating Shapley values")
 print("This may take a while...")
 system.time({explainer <- explain(rf_model, X=xvars, pred_wrapper=pfun, nsim=50, adjust=TRUE)})
 
-var_names <- c("Annual Mean Temperature" = "bio01",
-               "Temperature Seasonality" = "bio04",
-               "Max Temperature of Warmest Month" = "bio05",
-               "Mean Temperature of Wettest Quarter" = "bio08",
-               "Mean Temperature of Driest Quarter" = "bio09",
-               "Precipitation of Wettest Month" = "bio13",
-               "Precipitation of Driest Month" = "bio14",
-               "Precipitation Seasonality" = "bio15",
-               "Precipitation of Warmest Quarter" = "bio18",
-               "Precipitation of Coldest Quarter" = "bio19",
-               "Altitude" = "altitude",
-               "Distance to Rivers" = "dist_rivers",
-               "Longitude" = "xcoord",
-               "Latitude" = "ycoord")
-
-xvars <- xvars %>% rename(!!!var_names)
+colnames(xvars) <- var_names[colnames(xvars)]
 colnames(explainer) <- colnames(xvars)
 
 save(explainer, file="saved_data/explainer.RData")
@@ -317,8 +323,9 @@ save(explainer, file="saved_data/explainer.RData")
 
 shv <- shapviz(explainer, X=xvars)
 
-png("figs/ShapSummary.png", width=2000, height=1000, res=300)
-sv_importance(shv, max_display=10, kind="beeswarm")
+jpeg("figs/ShapSummary.jpg", width=2000, height=1000, res=300)
+sv_importance(shv, max_display=10, kind="beeswarm", size=0.5, alpha=0.5) +
+    scale_color_gradient(low="blue", high="red")
 dev.off()
 
 top_vars <- names(sort(apply(abs(explainer), 2, mean), decreasing=T))
@@ -330,15 +337,16 @@ shap_scores_df$xcoord <- data$xcoord
 shap_scores_df$ycoord <- data$ycoord
 shap_points <- st_as_sf(shap_scores_df, coords=c("xcoord", "ycoord"), crs=WGS84)
 
-# Spatial distribution of SHAP values
+# Spatial distribution of Shapley values
 shap_maps <- lapply(1:4, function(i) {
     shap_points_ordered <- shap_points %>% arrange(get(top_vars[i]))
     ggplot() +
         geom_sf(data=coast, fill="white") +
-        geom_sf(data=shap_points_ordered, aes(color=get(top_vars[i])), size=0.25) +
-        scale_color_viridis_c(option="turbo", name="SHAP value") +
+        geom_sf(data=shap_points_ordered, aes(color=get(top_vars[i])), size=0.5, alpha=0.5) +
+        scale_color_viridis_c(option="turbo", name="Shapley value") +
         scale_x_continuous(expand = c(0,0)) +
         scale_y_continuous(expand = c(0,0)) +
+        coord_sf(ylim = c(-60, 90)) +
         labs(title=top_vars[i]) +
         theme(
             plot.title = element_text(
@@ -349,11 +357,20 @@ shap_maps <- lapply(1:4, function(i) {
         )
 })
 
-png("figs/ShapMaps.png", width=2000, height=1000, res=300)
-do.call(grid.arrange, shap_maps)
+jpeg("figs/ShapMaps.jpg", width=2000, height=1000, res=300)
+# do.call(grid.arrange, shap_maps)
+ggarrange(plotlist=shap_maps, common.legend=TRUE, legend="right")
 dev.off()
 
+dependence_plots <- lapply(1:4, function(i) {
+    sv_dependence(shv, v=top_vars[i], size=0.5, alpha=0.5) +
+        scale_color_gradient(low="blue", high="red") +
+        # change y labels to "Shapley value"
+        labs(y="Shapley value")
+})
+
 # Dependence plots
-png("figs/ShapDependence.png", width=2500, height=1800, res=300)
-sv_dependence(shv, v=top_vars[1:4])
+jpeg("figs/ShapDependence.jpg", width=2500, height=1800, res=300)
+# sv_dependence(shv, v=top_vars[1:4])
+ggarrange(plotlist=dependence_plots, common.legend=TRUE, legend="right")
 dev.off()

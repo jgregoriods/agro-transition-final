@@ -294,7 +294,7 @@ rf_pred <- ggplot() +
     geom_sf(data=coast, fill="white") +
     geom_spatraster(data=predicted_time_r) +
     geom_sf(data=coast, fill="transparent") +
-    scale_fill_viridis_c(option="turbo", na.value="transparent", name="Predicted yr BP") +
+    scale_fill_viridis_c(option="turbo", na.value="transparent", name="Predicted BP") +
     scale_x_continuous(expand = c(0,0)) +
     scale_y_continuous(expand = c(0,0)) +
     coord_sf(ylim = c(-60, 90))
@@ -342,7 +342,7 @@ shap_maps <- lapply(1:4, function(i) {
     shap_points_ordered <- shap_points %>% arrange(get(top_vars[i]))
     ggplot() +
         geom_sf(data=coast, fill="white") +
-        geom_sf(data=shap_points_ordered, aes(color=get(top_vars[i])), size=0.5, alpha=0.5) +
+        geom_sf(data=shap_points_ordered, aes(color=get(top_vars[i])), size=0.2, alpha=0.5) +
         scale_color_viridis_c(option="turbo", name="Shapley value") +
         scale_x_continuous(expand = c(0,0)) +
         scale_y_continuous(expand = c(0,0)) +
@@ -363,14 +363,14 @@ ggarrange(plotlist=shap_maps, common.legend=TRUE, legend="right")
 dev.off()
 
 dependence_plots <- lapply(1:4, function(i) {
-    sv_dependence(shv, v=top_vars[i], size=0.5, alpha=0.5) +
+    sv_dependence(shv, v=top_vars[i], size=0.6, alpha=0.5) +
         scale_color_gradient(low="blue", high="red") +
         # change y labels to "Shapley value"
         labs(y="Shapley value")
 })
 
 # Dependence plots
-jpeg("figs/ShapDependence.jpg", width=2500, height=1800, res=300)
+jpeg("figs/ShapDependence.jpg", width=2000, height=1500, res=300)
 # sv_dependence(shv, v=top_vars[1:4])
 ggarrange(plotlist=dependence_plots, common.legend=TRUE, legend="right")
 dev.off()

@@ -200,30 +200,6 @@ data_points["pred"] <- max(raw_data$AgeCalBP) - predicted
 data_points["res"] <- residuals
 data_points <- data_points[order(abs(data_points$res)), ]
 
-# Individual predictions
-pred_plot <- ggplot() +
-    geom_sf(data=coast, fill="white") +
-    geom_sf(data=data_points, aes(col=pred), size=0.5, alpha=0.5) +
-    scale_color_viridis_c(option="turbo", name="Predicted yr BP") +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
-    coord_sf(ylim = c(-60, 90))
-jpeg("figs/SI_pred.jpg", width=2000, height=1000, res=300)
-plot(pred_plot)
-dev.off()
-
-# Residuals
-res_plot <- ggplot() +
-    geom_sf(data=coast, fill="white") +
-    geom_sf(data=data_points, aes(col=res)) +
-    scale_color_viridis_c(name="Residual", option="plasma") +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0)) +
-    coord_sf(ylim = c(-60, 90))
-png("figs/SI_res.png", width=2000, height=1000, res=300)
-plot(res_plot)
-dev.off()
-
 weights = rdist(data[,c("xcoord", "ycoord")])
 
 sink("results/moran.txt")
@@ -325,7 +301,7 @@ shv <- shapviz(explainer, X=xvars)
 
 jpeg("figs/ShapSummary.jpg", width=2000, height=1000, res=300)
 sv_importance(shv, max_display=10, kind="beeswarm", size=0.5, alpha=0.5) +
-    scale_color_gradient(low="blue", high="red")
+    scale_color_gradient(low="#0086fa", high="#ff004d")
 dev.off()
 
 top_vars <- names(sort(apply(abs(explainer), 2, mean), decreasing=T))
@@ -364,7 +340,7 @@ dev.off()
 
 dependence_plots <- lapply(1:4, function(i) {
     sv_dependence(shv, v=top_vars[i], size=0.6, alpha=0.5) +
-        scale_color_gradient(low="blue", high="red") +
+        scale_color_gradient(low="#0086fa", high="#ff004d") +
         # change y labels to "Shapley value"
         labs(y="Shapley value")
 })

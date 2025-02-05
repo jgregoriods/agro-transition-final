@@ -1,0 +1,29 @@
+name: agro-transition-env
+channels:
+  - conda-forge
+  - r
+dependencies:
+  - r-base=4.1
+  - r-ape
+  - r-caret
+  - r-dplyr
+  - r-fastshap
+  - r-fields
+  - r-ggplot2
+  - r-gridextra
+  - r-latticeextra
+  - r-progress
+  - r-randomforestsrc
+  - r-rastervis
+  - r-rcolorbrewer
+  - r-rnaturalearth
+  - r-rnaturalearthdata
+  - r-sf
+  - r-sp
+  - r-shapviz
+  - r-terra
+  - r-tidyterra
+  - r-vegan
+  - r-ggpubr
+  - r-ade4
+  - r-adespatial

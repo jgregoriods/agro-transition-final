@@ -19,8 +19,13 @@ This repository contains the code and data for the paper *Modeling the Global Tr
 ## How to Use
 1. Clone or download this repository.
 2. Download the QuickMEM source code from <a href="https://github.com/ajsmit/Quantitative_Ecology/blob/main/Num_Ecol_R_book_ed1/quickMEM.R" target="_blank">here</a> and place it in the same folder as the `main.R` file.
+3. If you are using conda, create the environment:
+```
+conda env create -f environment.yml
+conda activate agro_transition_env
+```
 3. Run the `main.R` script to reproduce the results. The script will:
-   - Install the required packages.
+   - Install the required packages (if missing).
    - Load the data.
    - Preprocess the data.
    - Fit the Random Survival Forest model.

@@ -2,7 +2,7 @@ required_packages <- c(
     "ape", "caret", "dplyr", "fastshap", "fields", "ggplot2", "gridExtra", 
     "latticeExtra", "progress", "randomForestSRC", "rasterVis", "RColorBrewer",
     "rnaturalearth", "rnaturalearthdata", "sf", "sp", "shapviz", "terra", 
-    "tidyterra", "vegan", "ggpubr", "ade4"
+    "tidyterra", "vegan", "ggpubr", "ade4", "adespatial"
 )
 
 missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
@@ -301,7 +301,8 @@ shv <- shapviz(explainer, X=xvars)
 
 jpeg("figs/ShapSummary.jpg", width=2000, height=1000, res=300)
 sv_importance(shv, max_display=10, kind="beeswarm", size=0.5, alpha=0.5) +
-    scale_color_gradient(low="#0086fa", high="#ff004d")
+    scale_color_gradient(low="#0086fa", high="#ff004d") +
+    labs(x="Shapley value")
 dev.off()
 
 top_vars <- names(sort(apply(abs(explainer), 2, mean), decreasing=T))

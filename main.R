@@ -2,7 +2,7 @@ required_packages <- c(
     "ape", "caret", "dplyr", "fastshap", "fields", "ggplot2", "gridExtra", 
     "latticeExtra", "progress", "randomForestSRC", "rasterVis", "RColorBrewer",
     "rnaturalearth", "rnaturalearthdata", "sf", "sp", "shapviz", "terra", 
-    "tidyterra", "vegan", "ggpubr", "ade4"
+    "tidyterra", "vegan", "ggpubr", "ade4", "adespatial"
 )
 
 missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]

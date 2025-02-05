@@ -2,13 +2,13 @@ required_packages <- c(
     "ape", "caret", "dplyr", "fastshap", "fields", "ggplot2", "gridExtra", 
     "latticeExtra", "progress", "randomForestSRC", "rasterVis", "RColorBrewer",
     "rnaturalearth", "rnaturalearthdata", "sf", "sp", "shapviz", "terra", 
-    "tidyterra", "vegan", "ggpubr", "ade4", "adespatial"
+    "tidyterra", "vegan", "ggpubr", "ade4"
 )
 
 missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
 if(length(missing_packages)) {
     print("Installing dependencies...")
-    install.packages(missing_packages)
+    install.packages(missing_packages, repos="http://cran.us.r-project.org")
 }
 
 library(ape)
